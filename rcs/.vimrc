@@ -22,6 +22,7 @@ filetype indent plugin on
  
 " Enable syntax highlighting
 syntax on
+colo elflord
  
  
 "------------------------------------------------------------
