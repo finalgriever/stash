@@ -2,27 +2,33 @@ server {
         listen 80 default_server;
         listen [::]:80 default_server ipv6only=on;
 
-        root /srv/web/;
-        index index.php index.html index.htm;
+        root /srv/web/angular;
+        index index.php index.html;
 
         server_name localhost;
 
         location / {
-            try_files $uri $uri/ =404;
+            try_files $uri $uri/ /index.html;
         }
 
-        error_page 404 /404.html;
-        error_page 500 502 503 504 /50x.html;
-        location = /50x.html {
-            root /usr/share/nginx/html;
+        location /api { ## URL string to use for api ##
+            alias /srv/web/api; ## Site root for Laravel code ##
+            try_files $uri $uri/ /index.php?$query_string;
         }
 
         location ~ \.php$ {
+            alias /srv/web/api/public;
             try_files $uri =404;
             fastcgi_split_path_info ^(.+\.php)(/.+)$;
             fastcgi_pass unix:/var/run/php/php5.6-fpm.sock;
             fastcgi_index index.php;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
             include fastcgi_params;
+        }
+
+        error_page 404 /404.html;
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
         }
 }

@@ -9,7 +9,7 @@ $env = 'development'
 
 # Begin Utilities
 
-if $environment == $development {
+if $env == 'development' {
 	package {'git':
 		ensure 	=> installed,
 		name 	=> 'git'
@@ -42,11 +42,18 @@ package {'vim':
 
 # Begin PHP Install
 
-apt::ppa{'ppa:ondrej/php':
+file { '/etc/environment':
+	content => inline_template('LC_ALL=en_US.UTF-8')
 }
 
-apt::key { 'ppa:ondrej/php':
-    key   =>  'E5267A6C',
+package { 'language':
+	name => 'language-pack-en-base',
+	ensure => installed
+}
+
+exec { 'pondrej':
+	command	=> '/usr/bin/add-apt-repository ppa:ondrej/php',
+	require	=> [Package['language'], File['/etc/environment']]
 }
 
 package { 'addPython':
@@ -56,8 +63,7 @@ package { 'addPython':
 
 exec { 'aptUpdate':
 	command	=> '/usr/bin/apt-get -y update',
-	require	=> [Apt::Ppa['ppa:ondrej/php'],
-				Apt::Key['ppa:ondrej/php'],
+	require	=> [Exec['pondrej'],
 				Package['addPython']]
 }
 
@@ -105,6 +111,11 @@ package {'nginx':
 	name 	=> 'nginx'
 }
 
+package {'npm':
+	ensure 	=> installed,
+	name 	=> 'npm'
+}
+
 package {'apache2':
 	ensure	=> purged,
 	name	=> 'apache2'
@@ -121,15 +132,15 @@ package {'apache2-data':
 }
 
 $siteConfFile = $env ? {
-	$development 	=> '/vagrant/stash/nginxdevsite',
-	$testing		=> '/vagrant/stash/nginxtestsite',
-	$production		=> '/vagrant/stash/nginxprodsite',
+	'development' 	=> '/vagrant/stash/nginxdevsite',
+	'testing'		=> '/vagrant/stash/nginxtestsite',
+	'production'	=> '/vagrant/stash/nginxprodsite',
 }
 
 $nginxConfFile = $env ? {
-	$development 	=> '/vagrant/stash/nginxdevconf',
-	$testing		=> '/vagrant/stash/nginxtestconf',
-	$production		=> '/vagrant/stash/nginxprodconf',
+	'development' 	=> '/vagrant/stash/nginxdevconf',
+	'testing'		=> '/vagrant/stash/nginxtestconf',
+	'production'	=> '/vagrant/stash/nginxprodconf',
 }
 
 file {'defaultconf':
