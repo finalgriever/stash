@@ -17,7 +17,7 @@ if $env == 'development' {
 	
 	file {'.vimrc':
 		ensure	=> file,
-		path	=> '/home/vagrant/.screenrc',
+		path	=> '/home/vagrant/.vimrc',
 		source	=> '/home/vagrant/synced/.vimrc'
 	}
 	
@@ -26,16 +26,28 @@ if $env == 'development' {
 		path	=> '/home/vagrant/.screenrc',
 		source	=> '/home/vagrant/synced/.screenrc'
 	}
+	
+	file {'sshconf':
+		path => '/home/vagrant/.ssh',
+		source => '/home/vagrant/synced/ssh',
+		recurse => true,
+		mode => '0700'
+	}
 
 	package {'screen':
 		ensure 	=> installed,
 		name 	=> 'screen'
 	}
-}
-
-package {'vim':
-	ensure 	=> installed,
-	name 	=> 'vim'
+	
+	package {'vim':
+		ensure 	=> installed,
+		name 	=> 'vim'
+	}
+	
+	exec { 'vundle':
+		command => '/usr/bin/git clone https://github.com/VundleVim/Vundle.vim.git /home/vagrant/.vim/bundle/Vundle.vim',
+		require => [Package['git'], Package['vim'], File['sshconf']]
+	}
 }
 
 # End Utilities
@@ -100,6 +112,36 @@ exec {'addComposer':
 
 # End Php Install
 
+# Begin Angular2 Install
+
+exec {'nodePpa':
+	command => '/usr/bin/curl -sL https://deb.nodesource.com/setup_6.x | /bin/bash -'
+}
+
+package {'nodejs':
+	ensure 	=> installed,
+	name 	=> 'nodejs',
+	require => Exec['nodePpa']
+}
+
+#package {'npm':
+#	ensure 	=> installed,
+#	name 	=> 'npm',
+#	require => Package['nodejs']
+#}
+
+exec {'upgradeNpm':
+	command => '/usr/bin/npm install npm -g',
+	require => Package['nodejs']
+}
+
+#exec {'upgradeNpm2':
+#	command => '/usr/local/bin/npm install npm -g',
+#	require => Exec['upgradeNpm1']
+#}
+
+# End Angular2 Install
+
 # Begin Web Server Configuration
 
 file { [  '/srv/', '/srv/web' ]:
@@ -109,11 +151,6 @@ file { [  '/srv/', '/srv/web' ]:
 package {'nginx':
 	ensure 	=> installed,
 	name 	=> 'nginx'
-}
-
-package {'npm':
-	ensure 	=> installed,
-	name 	=> 'npm'
 }
 
 package {'apache2':
