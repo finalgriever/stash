@@ -93,11 +93,37 @@ package { 'addFpm':
 	install_options => ['--allow-unauthenticated', '-f', '-y', '--force-yes']
 }
 
+package { 'addMbstring':
+	name	=> 'php5.6-mbstring',
+	ensure	=> installed,
+	require => Package['addPhp'],
+	install_options => ['--allow-unauthenticated', '-f', '-y', '--force-yes']
+}
+
+package { 'php5.6-mysql':
+	name	=> 'php5.6-mysql',
+	ensure	=> installed,
+	require => Package['addPhp'],
+	install_options => ['--allow-unauthenticated', '-f', '-y', '--force-yes']
+}
+
+package { 'addDomxml':
+	name	=> 'php5.6-xml',
+	ensure	=> installed,
+	require => Package['addPhp'],
+	install_options => ['--allow-unauthenticated', '-f', '-y', '--force-yes']
+}
+
+package { 'addUnzip':
+	name	=> 'unzip',
+	ensure	=> installed,
+}
+
 file {'php.ini':
 	ensure	=> file,
 	path	=> '/etc/php/5.6/fpm/php.ini',
 	source	=> '/vagrant/stash/phpini',
-	require	=> Package['addFpm']
+	require	=> [Package['addFpm'], Package['addMbstring'], Package['addDomxml'], Package['addUnzip']]
 }
 
 exec {'restartFpm':
@@ -124,21 +150,10 @@ package {'nodejs':
 	require => Exec['nodePpa']
 }
 
-#package {'npm':
-#	ensure 	=> installed,
-#	name 	=> 'npm',
-#	require => Package['nodejs']
-#}
-
 exec {'upgradeNpm':
 	command => '/usr/bin/npm install npm -g',
 	require => Package['nodejs']
 }
-
-#exec {'upgradeNpm2':
-#	command => '/usr/local/bin/npm install npm -g',
-#	require => Exec['upgradeNpm1']
-#}
 
 # End Angular2 Install
 
