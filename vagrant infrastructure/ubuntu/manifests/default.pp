@@ -48,6 +48,10 @@ if $env == 'development' {
 		command => '/usr/bin/git clone https://github.com/VundleVim/Vundle.vim.git /home/vagrant/.vim/bundle/Vundle.vim',
 		require => [Package['git'], Package['vim'], File['sshconf']]
 	}
+	
+	exec { 'typescriptvim':
+		command => '/usr/bin/git clone https://github.com/leafgarland/typescript-vim.git /home/vagrant/.vim/bundle/typescript-vim
+	}
 }
 
 # End Utilities
@@ -100,6 +104,12 @@ package { 'addMbstring':
 	install_options => ['--allow-unauthenticated', '-f', '-y', '--force-yes']
 }
 
+package { 'addCurl':
+	name => 'php5.6-curl',
+	ensure => installed,
+	require => Package['addPhp']
+}
+
 package { 'php5.6-mysql':
 	name	=> 'php5.6-mysql',
 	ensure	=> installed,
@@ -112,6 +122,10 @@ package { 'addDomxml':
 	ensure	=> installed,
 	require => Package['addPhp'],
 	install_options => ['--allow-unauthenticated', '-f', '-y', '--force-yes']
+}
+
+package { 'phpunit':
+	ensure => installed
 }
 
 package { 'addUnzip':
