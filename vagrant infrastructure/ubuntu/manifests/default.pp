@@ -27,6 +27,12 @@ if $env == 'development' {
 		source	=> '/home/vagrant/synced/.screenrc'
 	}
 	
+	file {'.basrc':
+		ensure	=> file,
+		path	=> '/home/vagrant/.bashrc',
+		source	=> '/home/vagrant/synced/.bashrc'
+	}
+	
 	file {'sshconf':
 		path => '/home/vagrant/.ssh',
 		source => '/home/vagrant/synced/ssh',
@@ -50,7 +56,7 @@ if $env == 'development' {
 	}
 	
 	exec { 'typescriptvim':
-		command => '/usr/bin/git clone https://github.com/leafgarland/typescript-vim.git /home/vagrant/.vim/bundle/typescript-vim
+		command => '/usr/bin/git clone https://github.com/leafgarland/typescript-vim.git /home/vagrant/.vim/bundle/typescript-vim'
 	}
 }
 
@@ -78,7 +84,7 @@ package { 'addPython':
 }
 
 exec { 'aptUpdate':
-	command	=> '/usr/bin/apt-get -y update',
+	command	=> '/usr/bin/apt-get -y update --fix-missing',
 	require	=> [Exec['pondrej'],
 				Package['addPython']]
 }
